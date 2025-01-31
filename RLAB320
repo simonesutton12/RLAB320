@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .todo-item { display: flex; align-items: center; }
+        .todo-item input[type="text"] { flex: 1; }
+        .todo-item button { margin-left: 5px; }
+        .todo-item.complete .delete-btn { display: inline; }
+        .todo-item.complete .edit-btn { display: inline; }
+        .todo-item.complete .edit-input { display: none; }
+        .todo-item.editing .delete-btn { display: none; }
+        .todo-item.editing .edit-btn { display: none; }
+        .todo-item.editing .edit-input { display: inline; }
+        .todo-item.editing .save-btn { display: inline; }
+    </style>
+</head>
+<body>
+    <h1>Todo List</h1>
+    <input id="new-todo-input" type="text" placeholder="New todo...">
+    <button onclick="addTodo()">Add</button>
+    <button onclick="markAllComplete()">Mark All Complete</button>
+    <ul id="todo-list"></ul>
+
+    <script>
+        let todos = [];
+
+        function addTodo() {
+            const newTodoInput = document.getElementById('new-todo-input');
+            if (newTodoInput.value.trim()) {
+                const todo = {
+                    text: newTodoInput.value.trim(),
+                    complete: false,
+                    editing: false
+                };
+                todos.unshift(todo);
+                newTodoInput.value = '';
+                renderTodos();
+            }
+        }
+
+        function deleteTodo(index) {
+            todos.splice(index, 1);
+            renderTodos();
+        }
+
+        function toggleComplete(index) {
+            todos[index].complete = !todos[index].complete;
+            renderTodos();
+        }
+
+        function editTodo(index) {
+            todos[index].editing = true;
+            renderTodos();
+        }
+
+        function saveTodoEdit(index) {
+            const editInput = document.querySelector(`#todo-list li:nth-child(${index + 1}) input[type="text"]`);
+            todos[index].text = editInput.value;
+            todos[index].editing = false;
+            renderTodos();
+        }
+
+        function markAllComplete() {
+            todos.forEach(todo => todo.complete = true);
+            renderTodos();
+        }
+
+        function renderTodos() {
+            const todoList = document.getElementById('todo-list');
+            todoList.innerHTML = '';
+            todos.forEach((todo, index) => {
+                const todoItem = document.createElement('li');
+                todoItem.className = `todo-item ${todo.complete ? 'complete' : ''} ${todo.editing ? 'editing' : ''}`;
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = todo.complete;
+                checkbox.addEventListener('change', () => toggleComplete(index));
+                
+                const todoText = document.createElement('span');
+                todoText.textContent = todo.text;
+                
+                const editInput = document.createElement('input');
+                editInput.type = 'text';
+                editInput.value = todo.text;
+                editInput.className = 'edit-input';
+                
+                const editButton = document.createElement('button');
+                editButton.textContent = 'Edit';
+                editButton.className = 'edit-btn';
+                editButton.addEventListener('click', () => editTodo(index));
+                
+                const saveButton = document.createElement('button');
+                saveButton.textContent = 'Save';
+                saveButton.className = 'save-btn';
+                saveButton.addEventListener('click', () => saveTodoEdit(index));
+                
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Delete';
+                deleteButton.className = 'delete-btn';
+                deleteButton.addEventListener('click', () => deleteTodo(index));
+                
+                todoItem.appendChild(checkbox);
+                todoItem.appendChild(editInput);
+                todoItem.appendChild(todoText);
+                todoItem.appendChild(editButton);
+                todoItem.appendChild(saveButton);
+                todoItem.appendChild(deleteButton);
+                todoList.appendChild(todoItem);
+            });
+        }
+    </script>
+</body>
+</html>
